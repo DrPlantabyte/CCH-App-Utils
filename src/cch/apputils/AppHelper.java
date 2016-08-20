@@ -36,6 +36,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -103,6 +104,27 @@ public class AppHelper {
 		return in;
 	}
 	
+	/**
+	 * Extracts all files (recursively) within a java package namespace into a 
+	 * specified destination directory.
+	 * @param refClass A class from the same code source (i.e. jar file) as the 
+	 * executable code (typically the class whose <code>main(...)</code> method 
+	 * is invoked).
+	 * @param internalPackage The package to extract
+	 * @param destinationDir The folder into which you want to extract the 
+	 * package files
+	 * @param makeDir If true, create he destination folder if it doesn't already exist
+	 * @throws IOException Thrown if there were any problems reading or writing 
+	 * files and folders.
+	 */
+	public static void unpackPackage(Class refClass, Package internalPackage, Path destinationDir, boolean makeDir) throws IOException{
+		String[] pathComps = internalPackage.getName().split("\\.");
+		if(pathComps.length == 1) {
+			unpackPackage(refClass, Paths.get(pathComps[0]) ,destinationDir, makeDir);
+		} else {
+			unpackPackage(refClass, Paths.get(pathComps[0],Arrays.copyOfRange(pathComps, 1, pathComps.length)) ,destinationDir, makeDir);
+		}
+	}
 	/**
 	 * Extracts all files (recursively) within a java package namespace into a 
 	 * specified destination directory.
@@ -240,6 +262,7 @@ public class AppHelper {
 		Class refClass = AppHelper.class;
 		try {
 			boolean portable = false;
+			System.out.println(Arrays.toString(AppHelper.class.getPackage().getName().split("\\.")));
 			System.out.println(System.getProperties().getProperty("os.name"));
 			System.out.println(getResourceFilePath("MyApp",Paths.get("images","face.png"),portable).toAbsolutePath());
 			BufferedReader in = new BufferedReader(new InputStreamReader(getInternalResource(refClass, Paths.get("cch","testdata","test.txt"))));
