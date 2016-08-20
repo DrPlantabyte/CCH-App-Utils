@@ -151,7 +151,7 @@ public class AppHelper {
 		if(Files.isDirectory(src)){
 			// running from folder, not a .jar
 			Path prefix = src.resolve(internalPackagePath);
-			FileHelper.copyDirectory(prefix, destinationDir, true);
+			FileHelper.copyDirectory(prefix, destinationDir, overwriteFiles);
 		} else if(Files.isRegularFile(src)){
 			// is running from a .jar (which is basically a .zip file)
 			final int BUFFER_SIZE = 4096;
