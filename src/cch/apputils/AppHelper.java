@@ -113,16 +113,17 @@ public class AppHelper {
 	 * @param internalPackage The package to extract
 	 * @param destinationDir The folder into which you want to extract the 
 	 * package files
-	 * @param makeDir If true, create he destination folder if it doesn't already exist
+	 * @param overwriteFiles If true, overwrite existing files. If false, skip 
+	 * existing files
 	 * @throws IOException Thrown if there were any problems reading or writing 
 	 * files and folders.
 	 */
-	public static void unpackPackage(Class refClass, Package internalPackage, Path destinationDir, boolean makeDir) throws IOException{
+	public static void unpackPackage(Class refClass, Package internalPackage, Path destinationDir, boolean overwriteFiles) throws IOException{
 		String[] pathComps = internalPackage.getName().split("\\.");
 		if(pathComps.length == 1) {
-			unpackPackage(refClass, Paths.get(pathComps[0]) ,destinationDir, makeDir);
+			unpackPackage(refClass, Paths.get(pathComps[0]) ,destinationDir, overwriteFiles);
 		} else {
-			unpackPackage(refClass, Paths.get(pathComps[0],Arrays.copyOfRange(pathComps, 1, pathComps.length)) ,destinationDir, makeDir);
+			unpackPackage(refClass, Paths.get(pathComps[0],Arrays.copyOfRange(pathComps, 1, pathComps.length)) ,destinationDir, overwriteFiles);
 		}
 	}
 	/**
@@ -136,13 +137,13 @@ public class AppHelper {
 	 * contents of the package <code>myapp.config.files</code>).
 	 * @param destinationDir The folder into which you want to extract the 
 	 * package files
-	 * @param makeDir If true, create he destination folder if it doesn't already exist
+	 * @param overwriteFiles If true, overwrite existing files. If false, skip 
+	 * existing files
 	 * @throws IOException Thrown if there were any problems reading or writing 
 	 * files and folders.
 	 */
-	public static void unpackPackage(Class refClass, Path internalPackagePath, Path destinationDir, boolean makeDir) throws IOException{
-		if(!Files.isDirectory(destinationDir) 
-				&& makeDir){
+	public static void unpackPackage(Class refClass, Path internalPackagePath, Path destinationDir, boolean overwriteFiles) throws IOException{
+		if(!Files.isDirectory(destinationDir)){
 			Files.createDirectories(destinationDir);
 		}
 		String pkg = delimitPath(internalPackagePath,"/");
@@ -166,15 +167,18 @@ public class AppHelper {
 					String filePath = destDir + File.separator + destName;
 					if (!entry.isDirectory()) {
 						// if the entry is a file, extracts it
-						BufferedOutputStream bos = new BufferedOutputStream(
-								new FileOutputStream(filePath)
-						);
-						byte[] bytesIn = new byte[BUFFER_SIZE];
-						int read;
-						while ((read = zipIn.read(bytesIn)) != -1) {
-							bos.write(bytesIn, 0, read);
+						File nf = new File(filePath);
+						if(!nf.exists() || overwriteFiles){
+							BufferedOutputStream bos = new BufferedOutputStream(
+									new FileOutputStream(nf)
+							);
+							byte[] bytesIn = new byte[BUFFER_SIZE];
+							int read;
+							while ((read = zipIn.read(bytesIn)) != -1) {
+								bos.write(bytesIn, 0, read);
+							}
+							bos.close();
 						}
-						bos.close();
 					} else {
 						// if the entry is a directory, make the directory
 						File dir = new File(filePath);
