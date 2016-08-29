@@ -25,8 +25,8 @@ package cch.apputils;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.DoubleAdder;
 import javafx.beans.value.ChangeListener;
@@ -44,6 +44,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -62,18 +63,18 @@ public class JFXGUIHelper {
 	 * Loads an FXML document and gets its controller class instance. Requires that the controller class be in the same code source as the FXML document.
 	 * @param <T> Template type for controller class
 	 * @param controllerClass The expected class for the controller of the FXML document
-	 * @param fxmlPath The resource path of the FXML document (e.g. <code>Paths.get("com","myapp","MainWindow.fxml")</code> )
+	 * @param fxmlPath The <i>absolute</i> resource path of the FXML document (e.g. <code>Paths.get("com","myapp","MainWindow.fxml")</code> )
 	 * @param contentRootPane Atomic reference instance so that the root pane of the FXML GUI can be returned
 	 * @return Returns the controller object instance
 	 */
 	public static <T> T loadFXML(Class<? extends T> controllerClass, Path fxmlPath, AtomicReference<Parent> contentRootPane){
-		return loadFXML(controllerClass, AppHelper.delimitPath(fxmlPath,"/"), contentRootPane);
+		return loadFXML(controllerClass, "/".concat(AppHelper.delimitPath(fxmlPath,"/")), contentRootPane);
 	}
 	/**
 	 * Loads an FXML document and gets its controller class instance. Requires that the controller class be in the same code source as the FXML document.
 	 * @param <T> Template type for controller class
 	 * @param controllerClass The expected class for the controller of the FXML document
-	 * @param fxmlPath The resource path of the FXML document (e.g. "/com/myapp/MainWindow.fxml")
+	 * @param fxmlPath The <i>absolute</i> resource path of the FXML document (e.g. "/com/myapp/MainWindow.fxml")
 	 * @param contentRootPane Atomic reference instance so that the root pane of the FXML GUI can be returned
 	 * @return Returns the controller object instance
 	 */
@@ -163,9 +164,9 @@ public class JFXGUIHelper {
 	 * to <code>true</code>.
 	 * @param title The title of the window
 	 * @param message The message in the window
-	 * @param progressTracker An instance of <code>DoubleAdder</code> whose value at any given moment represents progress towards the final goal.
+	 * @param progressTracker An instance of <code>DoubleAdder</code> whose value at any given moment represents progress towards the final goal. Negative values make the progress bar indeterminate.
 	 * @param maxProgress An instance of <code>DoubleAdder</code> whose value at any given moment represents the final progress goal.
-	 * @param taskDone 
+	 * @param taskDone Set to <code>true</code> to end the progress bar window
 	 * @param owner The owner of this created stage (can be null)
 	 */
 	public static void showProgressBar(final String title, final String message, final DoubleAdder progressTracker, final DoubleAdder maxProgress, final AtomicBoolean taskDone, final Stage owner){
@@ -323,6 +324,29 @@ public class JFXGUIHelper {
 		dialog.setTitle(title);
 		dialog.showAndWait();
 		return result.get();
+	}
+	/**
+	 * Creates a file chooser for opening and saving files
+	 * @param title The pop-up window title
+	 * @param initialDirectory The initial directory for this file chooser
+	 * @param initialFileName Starting file name
+	 * @param allowedSuffixes Allowed file suffixes (e.g. ".txt"), if restricted
+	 * @return A <code>javafx.stage.FileChooser</code> instance
+	 */
+	public static FileChooser makeFileChooser(String title, Path initialDirectory, String initialFileName, String... allowedSuffixes){
+		FileChooser fc = new FileChooser();
+		fc.setInitialDirectory(initialDirectory.toFile());
+		fc.setInitialFileName(initialFileName);
+		fc.setTitle(title);
+		FileChooser.ExtensionFilter[] filters = new FileChooser.ExtensionFilter[allowedSuffixes.length+1];
+		filters[0] = new FileChooser.ExtensionFilter("All Files","*.*");
+		for(int i = 0; i < allowedSuffixes.length; i++){
+			filters[i+1] = new FileChooser.ExtensionFilter(
+					"All Files","*"+allowedSuffixes[i]);
+		}
+		fc.getExtensionFilters().addAll(Arrays.asList(filters));
+		if(filters.length >= 1) fc.setSelectedExtensionFilter(filters[1]);
+		return fc;
 	}
 }
 
