@@ -70,9 +70,26 @@ public class AppHelper {
 		}
 		return path.toString();
 	}
+	/**
+	 * Turns a string representing a path into an instance of 
+	 * <code>java.nio.file.Path</code>
+	 * @param pathString The path string, such as "a/b/c.txt"
+	 * @param delimiter The path delimiter, such as "/"
+	 * @return an instance of <code>java.nio.file.Path</code>
+	 */
+	public static Path delimitStringToPath(String pathString, String delimiter){
+		String[] split = pathString.split(delimiter);
+		if(split.length == 1){
+			return Paths.get(split[0]);
+		} else {
+			String root = split[0];
+			String[] children = Arrays.copyOfRange(split, 1, split.length);
+			return Paths.get(root, children);
+		}
+	}
 	/** Static helper class, do not invoke */
 	private AppHelper(){
-		throw new UnsupportedOperationException("Static helper library class "+this.getClass()+" cannot be instantiated.");
+		throw new UnsupportedOperationException("Static helper library "+this.getClass()+" cannot be instantiated.");
 	}
 	/**
 	 * Gets the filepath to a location used for storing app resource files.
@@ -260,27 +277,4 @@ public class AppHelper {
 		return appDir;
 	}
 	
-	// TODO: remove test code and files
-	@Deprecated // for testing only
-	public static void main(String[] args){
-		Class refClass = AppHelper.class;
-		try {
-			boolean portable = false;
-			System.out.println(Arrays.toString(AppHelper.class.getPackage().getName().split("\\.")));
-			System.out.println(System.getProperties().getProperty("os.name"));
-			System.out.println(getResourceFilePath("MyApp",Paths.get("images","face.png"),portable).toAbsolutePath());
-			BufferedReader in = new BufferedReader(new InputStreamReader(getInternalResource(refClass, Paths.get("cch","testdata","test.txt"))));
-			System.out.println(in.readLine());
-			in.close();
-			System.out.println(getAppExecutablePath(refClass));
-			//unpackPackage(Paths.get("cch"),Paths.get("C:\\Users\\CCHall\\temp"),portable);
-			unpackPackage(
-					refClass,
-					Paths.get("cch","testdata"),
-					getResourceFilePath("MyApp",Paths.get("data"),portable),
-					true);
-		} catch (Exception ex) {
-			Logger.getLogger(refClass.getName()).log(Level.SEVERE, "Error", ex);
-		}
-	}
 }

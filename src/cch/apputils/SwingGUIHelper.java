@@ -38,7 +38,7 @@ import javax.swing.filechooser.FileFilter;
 public class SwingGUIHelper {
 	/** Static helper class, do not invoke */
 	private SwingGUIHelper(){
-		throw new UnsupportedOperationException("Static helper library class "+this.getClass()+" cannot be instantiated.");
+		throw new UnsupportedOperationException("Static helper library "+this.getClass()+" cannot be instantiated.");
 	}
 	/**
 	 * Asks the user if they're sure that they want to do something.
