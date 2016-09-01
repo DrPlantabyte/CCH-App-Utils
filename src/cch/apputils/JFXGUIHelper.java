@@ -38,6 +38,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -204,6 +205,54 @@ public class JFXGUIHelper {
 		updateThread.setDaemon(true);
 		updateThread.start();
 		dialog.show();
+	}
+	/**
+	 * 
+	 * @param <T> Type of object returned by menu
+	 * @param title The title of the window
+	 * @param message The message in the window
+	 * @param menu Map of menu selection labels and the corresponding object. 
+	 * The keys (which are strings) will be on the list shown to the user and 
+	 * the value for that string determines what is returned by this method.
+	 * @param okString The text on the "OK" button
+	 * @param cancelString The text on the "Cancel" button
+	 * @param owner The owner of this created stage (can be null)
+	 * @return Returns the object selected by the user, or null if no selection 
+	 * was made
+	 */
+	public static <T> T getChoiceFromMenu(String title, String message, java.util.Map<String,T> menu, String okString, String cancelString, Stage owner){
+		AtomicReference<T> result = new AtomicReference<>(null);
+		final Stage dialog = new Stage();
+		VBox root = new VBox();
+		root.setPadding(new Insets(8));
+		root.setSpacing(8);
+		Label msg = new Label(message);
+		msg.setWrapText(true);
+		msg.setPrefWidth(400);
+		root.getChildren().add(msg);
+		ListView<String> menuList = new ListView<>();
+		for(String key : menu.keySet()) menuList.getItems().add(key);
+		root.getChildren().add(menuList);
+		HBox buttonRow = new HBox();
+		buttonRow.setPadding(new Insets(8));
+		buttonRow.setSpacing(32);
+		Button okButton = new Button(okString);
+		Button cancelButton = new Button(cancelString);
+		okButton.setOnAction((ActionEvent ae)->{
+			result.set(menu.get(menuList.getSelectionModel().getSelectedItem()));
+			dialog.close();
+		});
+		cancelButton.setOnAction((ActionEvent ae)->{
+			dialog.close();
+		});
+		buttonRow.getChildren().addAll(okButton,cancelButton);
+		root.getChildren().add(buttonRow);
+		dialog.initModality(Modality.APPLICATION_MODAL);
+		dialog.initOwner(owner);
+		dialog.setScene(new Scene(root));
+		dialog.setTitle(title);
+		dialog.showAndWait();
+		return result.get();
 	}
 	
 	/**
