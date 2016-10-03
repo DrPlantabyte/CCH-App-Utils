@@ -204,8 +204,9 @@ public abstract class CCHDesktopApp extends Application {
         boolean appendToOldFiles = true;
         // configure main catch-all log
         try {
+			
             mainLogHandler = new java.util.logging.FileHandler(
-                    "log"+File.separator+"console-log%g.txt", logFileSizeLimit, logFileNumberLimit, appendToOldFiles);
+                    logDir.toString()+File.separator+"console-log%g.txt", logFileSizeLimit, logFileNumberLimit, appendToOldFiles);
             mainLogHandler.setFormatter(new java.util.logging.SimpleFormatter());
             mainLogHandler.setEncoding("UTF-8");
             mainLogHandler.setLevel(Level.FINE);
